@@ -1,0 +1,8 @@
+/* Override Bootstrap's striped table text color to highlight rows */
+table.table.table-striped tr.found td {
+    color:#B22222;
+}
+
+.found {
+    color:#B22222;
+}

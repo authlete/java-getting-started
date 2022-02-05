@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loyalty</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/loyalty.css">
+</head>
+<body>
+<div class="container">
+    <p><a href="logout">Logout</a></p>
+    <h1>Welcome, <span id="customer-name"></span>!</h1>
+    <div id="accounts"></div>
+    <h2>Transactions</h2>
+    <p>Today's transactions are <span class="found">highlighted.</span></p>
+    <div id="transactions"></div>
+    <a href="redeem.html">
+        <button type="button" class="btn btn-primary">Redeem Points</button>
+    </a>
+</div>
+<script src="js/loyalty.js"></script>
+<script>
+    'use strict';
+
+    function isToday(someDate){
+        const today = new Date()
+        return someDate.getDate() == today.getDate() &&
+            someDate.getMonth() == today.getMonth() &&
+            someDate.getFullYear() == today.getFullYear();
+    }
+
+    function renderTransaction(transaction) {
+        const date  = new Date(transaction.timestamp);
+        const trClass = isToday(date) ? ' class="found"' : '';
+        return `<tr${trClass}>
+            <td>${date.toLocaleDateString()}</td>
+            <td>${transaction.transactionType}</td>
+            <td>${transaction.amount}</td>
+        </tr>`
+    }
+
+    function renderTransactions(account) {
+        return `<table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Type</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${account.transactions.map(transaction => renderTransaction(transaction)).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    function renderAccount(account) {
+        return `<h2>Loyalty Account ${account.accountNumber}</h2>
+        <p>Balance: ${account.balance} points</p>`
+    }
+
+    async function handleLoad(event) {
+        const customer = await getCurrentCustomer();
+
+        document.getElementById('customer-name').textContent = customer.name;
+
+        // Assume just one loyalty account per customer
+        const account = customer.accounts[0];
+
+        document.getElementById('accounts').innerHTML = renderAccount(account);
+        document.getElementById('transactions').innerHTML = renderTransactions(account);
+    }
+    window.onload = handleLoad;
+</script>
+<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

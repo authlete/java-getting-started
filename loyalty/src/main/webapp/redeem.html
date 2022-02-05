@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Redeem Points</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/loyalty.css">
+</head>
+<body>
+<div class="container">
+    <h1>Redeem Points</h1>
+    <p>Current balance: <span id="pre-balance"></span> points</p>
+    <form id="form">
+        <div class="row justify-content-md-start">
+            <div class="col-md-auto">
+                <span class="align-text-top">Points to transfer to linked checking account</span>
+            </div>
+            <div class="col-md-auto">
+                <input type="number" class="form-control" id="points" placeholder="0">
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </form>
+    <p>Balance after transfer: <span id="post-balance"></span> points</p>
+</div>
+<script src="js/loyalty.js"></script>
+<script>
+    'use strict';
+
+    async function handleLoad() {
+        const customer = await getCurrentCustomer();
+
+        // Assume just one loyalty account per customer
+        const account = customer.accounts[0];
+        const balance = account.balance;
+
+        const preBalanceElem  = document.getElementById('pre-balance');
+        const postBalanceElem = document.getElementById('post-balance');
+        const pointsElem      = document.getElementById('points');
+        const form            = document.getElementById('form');
+
+        preBalanceElem.textContent = balance;
+        postBalanceElem.textContent = balance;
+        pointsElem.max = balance;
+
+        // Update post-balance
+        pointsElem.addEventListener('input', function(){
+            const points = parseInt(pointsElem.value, 10);
+            postBalanceElem.textContent = (balance - points).toString();
+        });
+
+        // Form submit
+        form.addEventListener('submit', function(event){
+            const points = parseInt(pointsElem.value, 10);
+            redeemPoints(account, points).then(response => {
+                window.location.href = "overview.html";
+            });
+            event.preventDefault();
+        });
+    }
+    window.onload = handleLoad;
+</script>
+<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
