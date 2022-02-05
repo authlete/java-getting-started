@@ -1,0 +1,18 @@
+{
+  "Salesforce" : {
+    "auth_uri" : "https://superpat-dev-ed.my.salesforce.com/services/oauth2/authorize",
+    "token_uri" : "https://superpat-dev-ed.my.salesforce.com/services/oauth2/token",
+    "client_id" : "3MVG9uudbyLbNPZPZmVBKNsYMq12NJX0gDMs1VMe6d7UJCl9HYHew63R.J6P1y3hVsSXVi1JFIBHraOgAFbQP",
+    "client_secret" : "3091496166142957194",
+    "redirect_uri" : "http://localhost:8080/ecommerce/oauth",
+    "query_params" : "prompt=consent"
+  },
+  "Loyalty" : {
+    "auth_uri" : "",
+    "token_uri" : "",
+    "client_id" : "",
+    "client_secret" : "",
+    "redirect_uri" : "",
+    "query_params" : ""
+  }
+}

@@ -1,6 +1,9 @@
+<%@ page import="java.util.Map" %>
+<%@ page import="com.authlete.sample.oauth.OAuthService" %>
 <%@ page session="true" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:useBean id="imageFolder" class="com.authlete.sample.ecommerce.ImageFolder" />
+<jsp:useBean id="oauthUtils" class="com.authlete.sample.oauth.OAuthUtils" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,16 +14,22 @@
 <body>
 <div class="container">
     <h1>eCommerce Application</h1>
-    <c:choose>
-        <c:when test="${sessionScope.salesforceId != null}">
-            <p>Welcome, ${sessionScope.salesforceId.displayName}</p>
-            <p><a href="oauth?unlink=salesforce">Unlink my Salesforce Account</a></p>
-        </c:when>
-        <c:otherwise>
-            <p><a href="oauth?link=salesforce">Link my Salesforce Account (test)</a></p>
-        </c:otherwise>
-    </c:choose>
-    <p><a href="#">Link my Loyalty Account</a></p>
+<%
+    for (Map.Entry<String, OAuthService> service : oauthUtils.getOAuthServices(application).entrySet()) {
+        String serviceName = service.getKey();
+        String name = (String)session.getAttribute(serviceName);
+        if (name != null) {
+%>
+            <p>Welcome, <%= name %></p>
+            <p><a href="oauth?unlink=<%= serviceName %>">Unlink my <%= serviceName %> Account</a></p>
+<%
+        } else {
+%>
+            <p><a href="oauth?link=<%= serviceName %>">Link my <%= serviceName %> Account</a></p>
+<%
+        }
+    }
+%>
     <div class="row">
 <%
     for (String imagePath : imageFolder.getImagePaths()) {
