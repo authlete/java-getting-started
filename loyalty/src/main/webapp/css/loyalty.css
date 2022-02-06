@@ -6,3 +6,22 @@ table.table.table-striped tr.found td {
 .found {
     color:#B22222;
 }
+
+/* Loading overlay etc */
+.hidden {
+    display: none;
+}
+
+.dimScreen {
+    position:fixed;
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(64, 64, 64, 0.5) url('../images/pulse-1s-200px.gif') no-repeat fixed center;
+}

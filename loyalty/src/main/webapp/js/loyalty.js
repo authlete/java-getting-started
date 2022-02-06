@@ -34,3 +34,8 @@ function redeemPoints(account, amount) {
         throw error;
     });
 }
+
+function hideLoadingScreen() {
+    document.getElementById('container').classList.remove("hidden");
+    document.getElementById('dimScreen').classList.add("hidden");
+}

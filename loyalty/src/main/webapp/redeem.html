@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/loyalty.css">
 </head>
 <body>
-<div class="container">
+<div id="container" class="container hidden">
     <h1>Redeem Points</h1>
     <p>Current balance: <span id="pre-balance"></span> points</p>
     <form id="form">
@@ -26,6 +26,7 @@
     </form>
     <p>Balance after transfer: <span id="post-balance"></span> points</p>
 </div>
+<div id="dimScreen" class="dimScreen"></div>
 <script src="js/loyalty.js"></script>
 <script>
     'use strict';
@@ -60,6 +61,8 @@
             });
             event.preventDefault();
         });
+
+        hideLoadingScreen();
     }
     window.onload = handleLoad;
 </script>

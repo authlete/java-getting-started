@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/loyalty.css">
 </head>
 <body>
-<div class="container">
+<div id="container" class="container hidden">
     <p><a href="logout">Logout</a></p>
     <h1>Welcome, <span id="customer-name"></span>!</h1>
     <div id="accounts"></div>
@@ -18,6 +18,7 @@
         <button type="button" class="btn btn-primary">Redeem Points</button>
     </a>
 </div>
+<div id="dimScreen" class="dimScreen"></div>
 <script src="js/loyalty.js"></script>
 <script>
     'use strict';
@@ -69,6 +70,8 @@
 
         document.getElementById('accounts').innerHTML = renderAccount(account);
         document.getElementById('transactions').innerHTML = renderTransactions(account);
+
+        hideLoadingScreen();
     }
     window.onload = handleLoad;
 </script>
