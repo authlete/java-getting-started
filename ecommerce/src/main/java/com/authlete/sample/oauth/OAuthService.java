@@ -2,6 +2,8 @@ package com.authlete.sample.oauth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Map;
+
 public class OAuthService {
   @JsonProperty("auth_uri")
   private String authUri;
@@ -19,7 +21,7 @@ public class OAuthService {
   private String redirectUri;
 
   @JsonProperty("query_params")
-  private String queryParams;
+  private Map<String, String> queryParams;
 
   @JsonProperty("auth_uri")
   public String getAuthUri() {
@@ -72,12 +74,12 @@ public class OAuthService {
   }
 
   @JsonProperty("query_params")
-  public String getQueryParams() {
+  public Map <String, String> getQueryParams() {
     return queryParams;
   }
 
   @JsonProperty("query_params")
-  public void setQueryParams(String queryParams) {
+  public void setQueryParams(Map <String, String> queryParams) {
     this.queryParams = queryParams;
   }
 }

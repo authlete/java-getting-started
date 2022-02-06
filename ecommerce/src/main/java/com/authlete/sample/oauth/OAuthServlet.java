@@ -37,7 +37,6 @@ public class OAuthServlet extends HttpServlet {
         return;
       }
 
-      String queryParams = service.getQueryParams();
       String authUri = service.getAuthUri();
 
       if (!OAuthUtils.isURL(authUri)) {
@@ -50,8 +49,10 @@ public class OAuthServlet extends HttpServlet {
           + "?response_type=code"
           + "&client_id=" + service.getClientId()
           + "&redirect_uri=" + service.getRedirectUri()
-          + "&state=" + serviceName
-          + (queryParams == null ? "" : "&" + service.getQueryParams());
+          + "&state=" + serviceName;
+      for (Map.Entry<String, String> param : service.getQueryParams().entrySet()) {
+        nextPage += "&" + param.getKey() + "=" +param.getValue();
+      }
     } else {
       for (String param : new String[]{"code", "state"}) {
         if (!params.containsKey(param)) {

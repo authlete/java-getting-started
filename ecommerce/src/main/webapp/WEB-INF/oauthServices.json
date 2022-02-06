@@ -5,7 +5,9 @@
     "client_id" : "3MVG9uudbyLbNPZPZmVBKNsYMq12NJX0gDMs1VMe6d7UJCl9HYHew63R.J6P1y3hVsSXVi1JFIBHraOgAFbQP",
     "client_secret" : "3091496166142957194",
     "redirect_uri" : "http://localhost:8080/ecommerce/oauth",
-    "query_params" : "prompt=consent"
+    "query_params" : {
+      "prompt" : "login"
+    }
   },
   "Loyalty" : {
     "auth_uri" : "",
@@ -13,6 +15,6 @@
     "client_id" : "",
     "client_secret" : "",
     "redirect_uri" : "",
-    "query_params" : ""
+    "query_params" : {}
   }
 }
