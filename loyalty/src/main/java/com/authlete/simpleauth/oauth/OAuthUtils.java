@@ -22,6 +22,8 @@ import java.util.Map;
 
 public class OAuthUtils {
     private static final String AUTHLETE_CREDENTIAL_JSON = "/WEB-INF/authleteCredential.json";
+    private static final String AUTHLETE_BASE = "https://api.authlete.com/api";
+    private static final Logger logger = LogManager.getLogger();
     private static final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     private static AuthleteCredential getAuthleteCredential(ServletContext context) throws IOException {
@@ -59,5 +61,37 @@ public class OAuthUtils {
         } catch (JsonProcessingException e) {
             return null;
         }
+    }
+
+    public static Map<String, Object> handleAuthleteApiCall(ServletContext context, HttpServletResponse response,
+                                                            String api, Map<String, Object> requestMap) throws IOException {
+        logger.debug("Calling API {} with params {}", api, OAuthUtils.prettyPrint(requestMap));
+
+        Map<String, Object> responseMap = getClient(context).target(AUTHLETE_BASE + api)
+                .request()
+                .post(Entity.entity(requestMap, MediaType.APPLICATION_JSON_TYPE), new GenericType<>() {
+                });
+
+        logger.debug("Received API response {}", OAuthUtils.prettyPrint(responseMap));
+
+        String action = (String)responseMap.get("action");
+        String responseContent = (String)responseMap.get("responseContent");
+
+        switch (action) {
+            case "INTERNAL_SERVER_ERROR":
+                setResponseBody(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, responseContent);
+                return null;
+            case "BAD_REQUEST":
+                setResponseBody(response, HttpServletResponse.SC_BAD_REQUEST, responseContent);
+                return null;
+            case "LOCATION":
+                response.setStatus(HttpServletResponse.SC_FOUND);
+                response.setHeader("Location", responseContent);
+                response.setHeader("Cache-Control", "no-store");
+                response.setHeader("Pragma", "no-cache");
+                return null;
+        }
+
+        return responseMap;
     }
 }

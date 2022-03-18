@@ -29,7 +29,8 @@ public class OAuthAuthorizationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Map<String, Object> authApiResponse = (Map<String, Object>) request.getSession().getAttribute("authApiResponse");
+        Map<String, Object> authApiResponse =
+                (Map<String, Object>) request.getSession().getAttribute("authApiResponse");
         request.getSession().removeAttribute("authApiResponse");
         logger.info("{} API response in the session", authApiResponse == null ? "No" : "Found an");
         if (authApiResponse == null) {
@@ -40,67 +41,54 @@ public class OAuthAuthorizationServlet extends HttpServlet {
     }
 
     private void initiateAuthleteAuthorization(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // 1. Get a Jersey HTTP client
-        Client client = OAuthUtils.getClient(getServletContext());
+        // 1. Call the Authlete Authorization endpoint, wrapping the incoming query string in a JSON object
+        Map<String, Object> authApiResponse = OAuthUtils.handleAuthleteApiCall(
+                getServletContext(), response, "/auth/authorization",
+                Collections.singletonMap("parameters", request.getQueryString()));
 
-        // 2. We will wrap the incoming query string in a JSON object
-        Map<String, Object> requestMap = Collections.singletonMap("parameters", request.getQueryString());
-
-        // 3. Call the Authlete Authorization endpoint
-        String url = "https://api.authlete.com/api/auth/authorization";
-
-        logger.info("Sending API request to {}:\n{}", url, OAuthUtils.prettyPrint(requestMap));
-
-        // 4. Make the API call, parsing the JSON response into a map
-        Map<String, Object> authApiResponse = client.target(url)
-                .request()
-                .post(Entity.entity(requestMap, MediaType.APPLICATION_JSON_TYPE), new GenericType<>() {
-                });
-
-        logger.info("Received API response:\n{}", OAuthUtils.prettyPrint(authApiResponse));
-
-        // 5. 'action' tells us what to do next, 'responseContent' is the payload we'll return
-        String action = (String) authApiResponse.get("action");
-        String responseContent = (String) authApiResponse.get("responseContent");
-
-        // 6. Perform the action
-        switch (action) {
-            case "INTERACTION":
-                List<Object> prompts = (List<Object>) authApiResponse.get("prompts");
-                for (Object prompt : prompts) {
-                    if (prompt.equals("LOGIN")) {
-                        // 7. Prompt the user to login
-                        request.getSession().setAttribute("authApiResponse", authApiResponse);
-                        LoginUtils.redirectForLogin(request, response);
-                        return;
-                    }
-                }
-                break;
-
-            // 8. Handle errors
-            case "INTERNAL_SERVER_ERROR":
-                OAuthUtils.setResponseBody(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, responseContent);
-                return;
-
-            case "BAD_REQUEST":
-                OAuthUtils.setResponseBody(response, HttpServletResponse.SC_BAD_REQUEST, responseContent);
-                return;
+        // 2. handleAuthleteApiCall() returns null if it already returned a response to the client
+        if (authApiResponse == null) {
+            return;
         }
 
-        // 9. We should never get here!
+        // 3. Perform the action
+        String action = (String)authApiResponse.get("action");
+        if (action.equals("INTERACTION")) {
+            List<Object> prompts = (List<Object>) authApiResponse.get("prompts");
+            for (Object prompt : prompts) {
+                if (prompt.equals("LOGIN")) {
+                    request.getSession().setAttribute("authApiResponse", authApiResponse);
+                    LoginUtils.redirectForLogin(request, response);
+                    return;
+                }
+            }
+        }
+
+        // 4. We should never get here!
         Map<String, String> errorResponse = Map.of(
-            "error", "unexpected_error",
-            "error_description", "Contact the service owner for details"
+                "error", "unexpected_error",
+                "error_description", "Contact the service owner for details"
         );
         OAuthUtils.setResponseBody(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, mapper.writeValueAsString(errorResponse));
     }
 
     private void processAuthleteAuthorization(HttpServletRequest request, HttpServletResponse response, Map<String, Object> authApiResponse) throws IOException {
-        // Not yet implemented!
-        Map<String, String> errorResponse = Map.of(
-            "error", "not_yet_implemented",
-            "error_description", "This step is not yet implemented"
-        );
-        OAuthUtils.setResponseBody(response, HttpServletResponse.SC_NOT_IMPLEMENTED, mapper.writeValueAsString(errorResponse));
+        // 1. Create a Map to send in the Authlete API request
+        Map<String, Object> requestMap = new HashMap<>();
+
+        // 2. Copy the ticket from the last API response into the map
+        requestMap.put("ticket", authApiResponse.get("ticket"));
+
+        // 3. Verify that the user is actually logged in
+        UserAccount authenticatedUser = LoginUtils.getAuthenticatedUser(request.getSession());
+        if (authenticatedUser == null) {
+            requestMap.put("reason", "NOT_LOGGED_IN");
+            OAuthUtils.handleAuthleteApiCall(getServletContext(), response, "/auth/authorization/fail", requestMap);
+            return;
+        }
+
+        // 4. Issue the code
+        requestMap.put("subject", authenticatedUser.getUsername());
+        OAuthUtils.handleAuthleteApiCall(getServletContext(), response, "/auth/authorization/issue", requestMap);
     }
 }
