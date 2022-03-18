@@ -1,0 +1,12 @@
+/* Center an image within a square, cropping as necessary */
+.center-cropped {
+    object-fit: cover;
+    object-position: center;
+    height: 250px;
+    width: 250px;
+    margin: 20px;
+}
+
+p {
+    font-size: 22px;
+}
