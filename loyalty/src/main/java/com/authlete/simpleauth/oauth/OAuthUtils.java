@@ -82,6 +82,7 @@ public class OAuthUtils {
                 setResponseBody(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, responseContent);
                 return null;
             case "BAD_REQUEST":
+            case "INVALID_CLIENT":
                 setResponseBody(response, HttpServletResponse.SC_BAD_REQUEST, responseContent);
                 return null;
             case "LOCATION":
