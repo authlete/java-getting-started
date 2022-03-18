@@ -54,6 +54,7 @@ public class LoginUtils {
     return requestUri.equals(contextPath + "/login") ||
             requestUri.equals(contextPath + "/index.html") ||
             requestUri.equals(contextPath + "/") ||
-            requestUri.startsWith(contextPath + "/css");
+            requestUri.startsWith(contextPath + "/css") ||
+            requestUri.startsWith(contextPath + "/oauth/");
   }
 }
