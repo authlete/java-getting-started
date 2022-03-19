@@ -43,6 +43,17 @@ public class LoginFilter implements Filter {
       return;
     }
 
+    // 1.5 Is there already a username attached to the request?
+    Principal principal = request.getUserPrincipal();
+    if (principal != null) {
+      String username = principal.getName();
+      if (username != null) {
+        logger.info("Allowing request for user principal {}", username);
+        chain.doFilter(request, response);
+        return;
+      }
+    }
+
     // 2. Try to retrieve user information from the HTTP session
     HttpSession session = request.getSession();
     UserAccount authenticatedUser = LoginUtils.getAuthenticatedUser(session);

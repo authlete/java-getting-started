@@ -55,6 +55,13 @@ public class OAuthUtils {
         response.getWriter().print(responseContent);
     }
 
+    private static void setAuthenticateHeader(HttpServletResponse response, int statusCode, String responseContent) {
+        response.setStatus(statusCode);
+        response.setHeader("WWW-Authenticate", responseContent);
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
+    }
+
     public static String prettyPrint(Map<String, Object> requestMap) {
         try {
             return mapper.writeValueAsString(requestMap);
@@ -85,12 +92,20 @@ public class OAuthUtils {
             case "INVALID_CLIENT":
                 setResponseBody(response, HttpServletResponse.SC_BAD_REQUEST, responseContent);
                 return null;
+            case "UNAUTHORIZED":
+                setAuthenticateHeader(response, HttpServletResponse.SC_UNAUTHORIZED, responseContent);
+                return null;
+            case "FORBIDDEN":
+                setAuthenticateHeader(response, HttpServletResponse.SC_FORBIDDEN, responseContent);
+                return null;
             case "LOCATION":
                 response.setStatus(HttpServletResponse.SC_FOUND);
                 response.setHeader("Location", responseContent);
                 response.setHeader("Cache-Control", "no-store");
                 response.setHeader("Pragma", "no-cache");
                 return null;
+            default:
+                break;
         }
 
         return responseMap;
