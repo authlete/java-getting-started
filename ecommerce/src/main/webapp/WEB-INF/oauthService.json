@@ -1,0 +1,10 @@
+{
+  "service_name": "Loyalty",
+  "auth_uri": "http://localhost:8081/loyalty/oauth/authorization",
+  "token_uri": "http://localhost:8081/loyalty/oauth/token",
+  "redirect_uri": "http://localhost:8080/ecommerce/oauth",
+  "query_params": {
+    "prompt": "login"
+  },
+  "api_endpoint": "http://localhost:8081/loyalty/api/currentCustomer"
+}

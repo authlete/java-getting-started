@@ -1,9 +1,12 @@
 ARG PLATFORM=amd64
 FROM ${PLATFORM}/rockylinux
 
+ARG MODULE
+
 MAINTAINER pat.patterson@authlete.com
 
-ARG TOMCAT_VERSION=9.0.59
+# Set this to latest Tomcat 9.0.x
+ARG TOMCAT_VERSION=9.0.62
 
 # Download and install Tomcat
 RUN mkdir /opt/tomcat/
@@ -25,16 +28,15 @@ COPY .gitignore /src/
 
 # Restore from the git repo
 WORKDIR /src
-RUN git restore .
+RUN git restore ${MODULE}
 
-# Build and deploy the WAR files
-WORKDIR /src/ecommerce
-RUN mvn clean package
-RUN /usr/bin/cp target/ecommerce.war /opt/tomcat/webapps/
+# Checkout tutorial starting point
+RUN git checkout main
 
-WORKDIR /src/loyalty
+# Build and deploy the WAR file
+WORKDIR /src/${MODULE}
 RUN mvn clean package
-RUN /usr/bin/cp target/loyalty.war /opt/tomcat/webapps/
+RUN /usr/bin/cp target/${MODULE}.war /opt/tomcat/webapps/
 
 # Copy the runtime scripts
 COPY docker/run/* /run/

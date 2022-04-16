@@ -4,7 +4,7 @@
 set -e
 
 usage() {
-  echo "Usage: $0 [ -a architecture ] [ -i image_name ]" 1>&2
+  echo "Usage: $0 [ -a architecture ] [ -i image_prefix ]" 1>&2
 }
 
 exit_abnormal() {
@@ -13,7 +13,10 @@ exit_abnormal() {
 }
 
 # Default architecture - pass arm64v8 for M1 Mac
-arch=amd64
+arch="amd64"
+
+# Default image prefix
+image="us-docker.pkg.dev/authlete/demo/java-getting-started"
 
 while getopts ":a:i:" opt; do
   case $opt in
@@ -30,8 +33,7 @@ while getopts ":a:i:" opt; do
   esac
 done
 
-if [ "${image}" == "" ]; then
-  image="us-docker.pkg.dev/authlete/demo/java-getting-started:${arch}"
-fi
-
-docker build --platform "linux/${arch}" -t "${image}" --build-arg "PLATFORM=${arch}" .
+for module in ecommerce loyalty
+do
+  docker build --platform "linux/${arch}" -t "${image}-${module}" --build-arg "PLATFORM=${arch}" --build-arg "MODULE=${module}" .
+done

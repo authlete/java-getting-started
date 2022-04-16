@@ -14,19 +14,18 @@
 <div class="container">
     <h1>eCommerce Application</h1>
 <%
-    for (Map.Entry<String, OAuthService> service : OAuthUtils.getOAuthServices(application).entrySet()) {
-        String serviceName = service.getKey();
-        String message = OAuthUtils.renderServiceText(request, serviceName);
-        if (message != null) {
+    OAuthService service = OAuthUtils.getOAuthService(application);
+    String serviceName = service.getServiceName();
+    String message = OAuthUtils.renderServiceText(request);
+    if (message != null) {
 %>
-            <p><%= message %></p>
-            <p><a href="oauth?unlink=<%= serviceName %>">Unlink my <%= serviceName %> Account</a></p>
+        <p><%= message %></p>
+        <p><a href="oauth?unlink=<%= serviceName %>">Unlink my <%= serviceName %> Account</a></p>
 <%
-        } else {
+    } else {
 %>
-            <p><a href="oauth?link=<%= serviceName %>">Link my <%= serviceName %> Account</a></p>
+        <p><a href="oauth?link=<%= serviceName %>">Link my <%= serviceName %> Account</a></p>
 <%
-        }
     }
 %>
     <div class="row">

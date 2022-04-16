@@ -4,7 +4,7 @@
 set -e
 
 usage() {
-  echo "Usage: $0 [ -a architecture ] [ -i image_name ] [ -n instance_name ] [ -p host_port ] [ -s host_source_directory ] [ -v volume_name ]" 1>&2
+  echo "Usage: $0 [ -a architecture ] [ -i image_prefix ] [ -n instance_name ] [ -p host_port ] [ -s host_source_directory ] [ -v volume_name ]" 1>&2
 }
 
 exit_abnormal() {
@@ -16,26 +16,29 @@ exit_abnormal() {
 machine=$(uname -m)
 if [ "${machine}" == "arm64" ]; then
   # M1 Mac
-  arch=arm64v8
+  arch="arm64v8"
 elif [ "${machine}" == "amd64" ]; then
   # Intel
-  arch=amd64
+  arch="amd64"
 else
   echo "Unrecognised machine: ${machine}"
   exit 1
 fi
 
 # Default instance name
-name=authlete-getting-started
+name="authlete-getting-started"
 
 # Default host port
 port=8080
 
 # Default source directory
-srcdir="$(pwd)"/src
+srcdir="$(pwd)/src"
 
 # Default volume name
-volume=authlete-src
+volume="authlete-src"
+
+# Default image prefix
+image="us-docker.pkg.dev/authlete/demo/java-getting-started"
 
 while getopts ":a:i:n:p:s:" opt; do
   case $opt in
@@ -58,14 +61,20 @@ while getopts ":a:i:n:p:s:" opt; do
   esac
 done
 
-if [ "${image}" == "" ]; then
-  image="us-docker.pkg.dev/authlete/demo/java-getting-started:latest"
-fi
+# E-Commerce instance
+docker run -d \
+  --platform "linux/${arch}" \
+  --name "${name}-ecommerce" \
+  --publish "${port}":8080 \
+  "${image}-ecommerce"
 
-# Use bind mount - host src directory is mounted at /mount in the container
+# Loyalty instance - use bind mount - host src directory is mounted at /mount in the container
+((port++))
+mkdir -p ${srcdir}
 docker run -d \
   --platform linux/"${arch}" \
-  --name "${name}" \
+  --name "${name}-loyalty" \
   --publish "${port}":8080 \
   --mount type=bind,source="${srcdir}",target=/mount \
-  "${image}"
+  "${image}-loyalty"
+

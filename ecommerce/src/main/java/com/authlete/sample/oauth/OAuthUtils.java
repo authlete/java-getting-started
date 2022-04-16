@@ -26,53 +26,36 @@ import java.util.Map;
 
 public class OAuthUtils {
   private static final Logger logger = LogManager.getLogger();
-  private static final Object lock = new Object();
-  private static volatile Map<String, OAuthService> oauthServices;
   private static final Client client = ClientBuilder.newClient(new ClientConfig());
+  private static OAuthService oauthService;
 
-  public static Map<String, OAuthService> getOAuthServices(ServletContext context) throws IOException {
-    // Double-checked synchronization. See https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
-    Map<String, OAuthService> localRef = oauthServices;
-    if (localRef == null) {
-      synchronized (lock) {
-        localRef = oauthServices;
-        if (localRef == null) {
-          ObjectMapper mapper = new ObjectMapper();
-          InputStream inputStream = context.getResourceAsStream("/WEB-INF/oauthServices.json");
-          List<OAuthService> services = mapper.readValue(inputStream, new TypeReference<ArrayList<OAuthService>>() {});
+  public static synchronized OAuthService getOAuthService(ServletContext context) throws IOException {
+    if (oauthService == null) {
+      ObjectMapper mapper = new ObjectMapper();
+      InputStream inputStream = context.getResourceAsStream("/WEB-INF/oauthService.json");
+      oauthService = mapper.readValue(inputStream, OAuthService.class);
 
-          // Build a map for easy access to services
-          oauthServices = localRef = new LinkedHashMap<>();
-          for (OAuthService service : services) {
-            localRef.put(service.getServiceName(), service);
-          }
+      // Read credentials from environment variables
+      OAuthCredential credential = new OAuthCredential();
+      credential.setClientId(System.getenv("CLIENT_ID"));
+      credential.setClientSecret(System.getenv("CLIENT_SECRET"));
 
-          // Store credentials in a separate file so it doesn't get checked into GitHub!
-          inputStream = context.getResourceAsStream("/WEB-INF/oauthCredentials.json");
-          List<OAuthCredential> credentials = mapper.readValue(inputStream, new TypeReference<ArrayList<OAuthCredential>>() {});
-
-          // Merge the configurations
-          for (OAuthCredential credential : credentials) {
-            OAuthService service = localRef.get(credential.getServiceName());
-            service.setCredential(credential);
-          }
-        }
-      }
+      oauthService.setCredential(credential);
     }
 
-    return localRef;
+    return oauthService;
   }
 
-  public static String renderServiceText(HttpServletRequest request, String serviceName) throws ServletException {
+  public static String renderServiceText(HttpServletRequest request) throws ServletException {
     // Retrieve OAuth response from session
-    OAuthResponse oauthResponse = (OAuthResponse)request.getSession().getAttribute(serviceName);
+    OAuthResponse oauthResponse = (OAuthResponse)request.getSession().getAttribute(OAuthResponse.class.getSimpleName());
     if (oauthResponse == null) {
       return null;
     }
 
     try {
       // Get the current customer data from the loyalty program API
-      String currentCustomerUrl = oauthServices.get(serviceName).getApiEndpoint();
+      String currentCustomerUrl = oauthService.getApiEndpoint();
       logger.info("Calling loyalty program current customer API at {}", currentCustomerUrl);
       Response customerResponse = client.target(currentCustomerUrl)
               .request()
