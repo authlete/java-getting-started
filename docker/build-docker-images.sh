@@ -12,7 +12,7 @@ exit_abnormal() {
   exit 1
 }
 
-# Default architecture - pass arm64v8 for M1 Mac
+# Default architecture - pass arm64/v8 for M1 Mac
 arch="amd64"
 
 # Default image prefix

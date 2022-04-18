@@ -16,7 +16,7 @@ exit_abnormal() {
 machine=$(uname -m)
 if [ "${machine}" == "arm64" ]; then
   # M1 Mac
-  arch="arm64v8"
+  arch="arm64/v8"
 elif [ "${machine}" == "amd64" ]; then
   # Intel
   arch="amd64"
