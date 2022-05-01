@@ -33,14 +33,14 @@ COPY .gitignore /src/
 
 # Restore from the git repo
 WORKDIR /src
-RUN git restore ${MODULE}
+RUN git restore .
 
 # Checkout tutorial starting point
 RUN git checkout main
 
 # Build and deploy the WAR file
 WORKDIR /src/${MODULE}
-RUN mvn clean package
+RUN --mount=type=cache,target=/root/.m2 mvn clean package
 RUN /usr/bin/cp target/${MODULE}.war /opt/tomcat/webapps/
 
 # Copy the runtime scripts
