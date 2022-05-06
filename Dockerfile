@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn clean package
 RUN /usr/bin/cp target/${MODULE}.war /opt/tomcat/webapps/
 
 # Copy the runtime scripts
-COPY docker/run/* /run/
+COPY ${MODULE}/docker/run/* /run/
 RUN chmod +x /run/*
 
 EXPOSE 8080
