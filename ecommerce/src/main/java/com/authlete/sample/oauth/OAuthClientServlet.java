@@ -14,8 +14,8 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@WebServlet(name = "oauthServlet", value = "/oauth")
-public class OAuthServlet extends HttpServlet {
+@WebServlet(name = "oauthClientServlet", value = "/oauth")
+public class OAuthClientServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     OAuthService oauthService = OAuthUtils.getOAuthService(getServletContext());
