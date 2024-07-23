@@ -1,5 +1,5 @@
 # Authlete OAuth Server Tutorial
-This repo is for the Authlete OAuth server tutorial for Java. In it, you will walk through setting up an API resource server. Once working, you will learn how to add authorization to the API server using the Authlete service. 
+This repo is for the Authlete OAuth server tutorial for Java. In it you will walk through setting up an API resource server. Once working, you will learn how to add authorization to the API server using the Authlete service. 
 
 To give it a try, head to the tutorial [page](https://www.authlete.com/developers/tutorial/getting_started_java/) and get started. 
 
